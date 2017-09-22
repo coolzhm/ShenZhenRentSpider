@@ -9,3 +9,7 @@
 class ShenzhenrentspiderPipeline(object):
     def process_item(self, item, spider):
         return item
+
+# 将爬取数据存入MYSQL
+class SetDataToMySQLPipeline(object):
+    pass
