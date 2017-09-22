@@ -18,7 +18,11 @@ class HouseInfoItem(Item):
     title = Field()
     #所属区域 如：宝安
     area = Field()
-    # 地址、位置 如：某某花园
+    #地名 如：沙井
+    place = Field()
+    #小区 如：大冲城市花园
+    village = Field()
+    # 详细地址、位置 如：南山蛇口望海路与金世纪路交汇处
     location = Field()
     # 租金
     price = Field()
