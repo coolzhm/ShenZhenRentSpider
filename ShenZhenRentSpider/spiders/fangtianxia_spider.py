@@ -2,7 +2,6 @@
 
 from scrapy.spider import Spider
 import scrapy
-import re
 from ShenZhenRentSpider.items import HouseInfoItem
 
 
@@ -18,6 +17,7 @@ class FangTianXiaSpider(Spider):
         baseurl = 'http://zu.sz.fang.com'
         # 爬取页面信息
         list = response.xpath('//*[@id="listBox"]/div[3]/dl')
+        print('------ 准备爬取网页 "{0}" 信息 ------'.format(response.url))
         for i in range(1, len(list) + 1):
             print("---------现在爬取第{0}个数据！！！---------------".format(i))
             item = HouseInfoItem()
@@ -44,6 +44,7 @@ class FangTianXiaSpider(Spider):
 
             detail_url = "http://zu.sz.fang.com{0}".format(
                 response.xpath('//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[1]/a/@href'.format(i)).extract_first())
+
             yield scrapy.Request(detail_url, callback=self.parse_rent_info, meta={'item': item})
             # yield item
 
@@ -51,12 +52,10 @@ class FangTianXiaSpider(Spider):
         pagelist = response.xpath('//*[@id="rentid_D10_01"]/a')
         for j in range(1, len(pagelist) + 1):
             value = response.xpath('//*[@id="rentid_D10_01"]/a[{0}]/text()'.format(j)).extract_first()
-            next_url = response.xpath('//*[@id="rentid_D10_01"]/a/@href').extract_first()
-            # re.match('')
+            next_url = response.xpath('//*[@id="rentid_D10_01"]/a[%s]/@href' % j).extract_first()
             result = u'下一页' in str(value)
             if (result):
                 yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse)
-                # print('************* 内容：{0} 结果：{1} *****************'.format(value, result))
         print('----------------------- 爬取结束 ----------------------------')
 
     # 进入子页面获取内容
