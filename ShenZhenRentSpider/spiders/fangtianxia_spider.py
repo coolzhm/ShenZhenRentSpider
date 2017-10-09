@@ -7,17 +7,21 @@ from ShenZhenRentSpider.items import HouseInfoItem
 
 class FangTianXiaSpider(Spider):
     name = 'ftx'
-    allowed_domains = ['fang.com', 'http://zu.sz.fang.com']
+    # 爬取速度为1s
+    # download_delay = 0.5
     start_urls = [
-        'http://zu.sz.fang.com/'
+        'http://zu.sz.fang.com'
     ]
+    allowed_domains = ['fang.com', 'zu.sz.fang.com', 'zu.sz.fang.com/house/']
 
     # 遍历爬取
     def parse(self, response):
         baseurl = 'http://zu.sz.fang.com'
         # 爬取页面信息
-        list = response.xpath('//*[@id="listBox"]/div[3]/dl')
+        list = response.xpath('//*[@class="houseList"]/dl')
         print('------ 准备爬取网页 "{0}" 信息 ------'.format(response.url))
+        print('================= {0} ===================='.format(response.xpath('//*[@id="rentid_D09_01_02"]/a/text()').extract_first()))
+        print('========当前页面共有 {0} 个房源========='.format(len(list)))
         for i in range(1, len(list) + 1):
             print("---------现在爬取第{0}个数据！！！---------------".format(i))
             item = HouseInfoItem()
