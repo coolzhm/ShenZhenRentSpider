@@ -8,11 +8,14 @@ from ShenZhenRentSpider.items import HouseInfoItem
 class FangTianXiaSpider(Spider):
     name = 'ftx'
     # 减慢爬取速度 为1s
-    # download_delay = 1
+    # download_delay = 0.25
     start_urls = [
         'http://zu.sz.fang.com'
     ]
-    aa = 1
+    # 页面计数器
+    page_count = 1
+    # 数据量计数器
+    data_count = 0
     allowed_domains = ['fang.com', 'zu.sz.fang.com', 'zu.sz.fang.com/house/']
 
     # 遍历爬取
@@ -20,9 +23,10 @@ class FangTianXiaSpider(Spider):
         baseurl = 'http://zu.sz.fang.com'
         # 爬取页面信息
         list = response.xpath('//*[@class="houseList"]/dl')
-        print('------ 准备爬取第【{1}】网页 "{0}" 信息 ------'.format(response.url, self.aa))
+        print('------ 准备爬取第【{1}】网页 "{0}" 信息 ------'.format(response.url, self.page_count))
         print('========当前页面共有 {0} 个房源========='.format(len(list)))
         for i in range(1, len(list) + 1):
+            self.data_count = self.data_count + 1
             print("--------- 现在爬取第{0}个数据！！！---------------".format(i))
             item = HouseInfoItem()
             item['title'] = response.xpath(
@@ -53,16 +57,19 @@ class FangTianXiaSpider(Spider):
 
         # 遍历页码的标签，查看是否存在 下一页
         pagelist = response.xpath('//*[@id="rentid_D10_01"]/a')
-        for j in range(1, len(pagelist) + 1):
-            value = response.xpath('//*[@id="rentid_D10_01"]/a[{0}]/text()'.format(j)).extract_first()
-            next_url = response.xpath('//*[@id="rentid_D10_01"]/a[%s]/@href' % j).extract_first()
-            result = u'下一页' in str(value)
-            if (result):
-                yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse)
+        if (self.page_count <= 2):
 
-        print('----------------------- 爬取第【{0}】页面结束 --------------------------'.format(self.aa))
-        # 计数
-        self.aa = self.aa + 1
+            for j in range(1, len(pagelist) + 1):
+                value = response.xpath('//*[@id="rentid_D10_01"]/a[{0}]/text()'.format(j)).extract_first()
+                next_url = response.xpath('//*[@id="rentid_D10_01"]/a[%s]/@href' % j).extract_first()
+                result = u'下一页' in str(value)
+                if (result):
+                    yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse)
+
+            print('----------------------- 爬取第【{0}】页面结束 --------------------------'.format(self.page_count))
+            print('----------------------- 总计爬取【{0}】数据量 --------------------------'.format(self.data_count))
+            # 计数
+            self.page_count = self.page_count + 1
 
     # 进入子页面获取内容
     def parse_rent_info(self, response):
