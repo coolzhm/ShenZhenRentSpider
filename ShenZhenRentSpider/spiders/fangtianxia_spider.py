@@ -7,11 +7,12 @@ from ShenZhenRentSpider.items import HouseInfoItem
 
 class FangTianXiaSpider(Spider):
     name = 'ftx'
-    # 爬取速度为1s
-    # download_delay = 0.5
+    # 减慢爬取速度 为1s
+    # download_delay = 1
     start_urls = [
         'http://zu.sz.fang.com'
     ]
+    aa = 1
     allowed_domains = ['fang.com', 'zu.sz.fang.com', 'zu.sz.fang.com/house/']
 
     # 遍历爬取
@@ -19,38 +20,36 @@ class FangTianXiaSpider(Spider):
         baseurl = 'http://zu.sz.fang.com'
         # 爬取页面信息
         list = response.xpath('//*[@class="houseList"]/dl')
-        print('------ 准备爬取网页 "{0}" 信息 ------'.format(response.url))
-        print('================= {0} ===================='.format(response.xpath('//*[@id="rentid_D09_01_02"]/a/text()').extract_first()))
+        print('------ 准备爬取第【{1}】网页 "{0}" 信息 ------'.format(response.url, self.aa))
         print('========当前页面共有 {0} 个房源========='.format(len(list)))
         for i in range(1, len(list) + 1):
-            print("---------现在爬取第{0}个数据！！！---------------".format(i))
+            print("--------- 现在爬取第{0}个数据！！！---------------".format(i))
             item = HouseInfoItem()
             item['title'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[1]/a/@title'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[1]/a/@title'.format(i)).extract_first()
             item['area'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[3]/a[1]/span/text()'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[3]/a[1]/span/text()'.format(i)).extract_first()
             item['place'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[3]/a[2]/span/text()'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[3]/a[2]/span/text()'.format(i)).extract_first()
             item['village'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[3]/a[3]/span/text()'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[3]/a[3]/span/text()'.format(i)).extract_first()
             item['price'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/div[2]/p/span/text()'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/div[2]/p/span/text()'.format(i)).extract_first()
             item['unit'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/div[2]/p/text()'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/div[2]/p/text()'.format(i)).extract_first()
             item['rentstyle'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[2]/text()[1]'.format(i)).extract_first()
-            # item['renttype'] = response.xpath('//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[2]/text()[1]'.format(i)).extract()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[2]/text()[1]'.format(i)).extract_first()
+            # item['renttype'] = response.xpath('//*[@class="houseList"]/dl[{0}]/dd/p[2]/text()[1]'.format(i)).extract()
             item['size'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[2]/text()[3]'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[2]/text()[3]'.format(i)).extract_first()
             item['info'] = response.xpath(
-                '//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[2]/text()[2]'.format(i)).extract_first()
-            item['url'] = response.xpath('//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[1]/a/@href'.format(i)).extract_first()
+                '//*[@class="houseList"]/dl[{0}]/dd/p[2]/text()[2]'.format(i)).extract_first()
+            item['url'] = response.xpath('//*[@class="houseList"]/dl[{0}]/dd/p[1]/a/@href'.format(i)).extract_first()
 
             detail_url = "http://zu.sz.fang.com{0}".format(
-                response.xpath('//*[@id="listBox"]/div[3]/dl[{0}]/dd/p[1]/a/@href'.format(i)).extract_first())
+                response.xpath('//*[@class="houseList"]/dl[{0}]/dd/p[1]/a/@href'.format(i)).extract_first())
 
             yield scrapy.Request(detail_url, callback=self.parse_rent_info, meta={'item': item})
-            # yield item
 
         # 遍历页码的标签，查看是否存在 下一页
         pagelist = response.xpath('//*[@id="rentid_D10_01"]/a')
@@ -60,7 +59,10 @@ class FangTianXiaSpider(Spider):
             result = u'下一页' in str(value)
             if (result):
                 yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse)
-        print('----------------------- 爬取结束 ----------------------------')
+
+        print('----------------------- 爬取第【{0}】页面结束 --------------------------'.format(self.aa))
+        # 计数
+        self.aa = self.aa + 1
 
     # 进入子页面获取内容
     def parse_rent_info(self, response):
