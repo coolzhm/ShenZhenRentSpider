@@ -65,7 +65,8 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'ShenZhenRentSpider.pipelines.ShenzhenrentspiderPipeline': 1,
+   'ShenZhenRentSpider.pipelines.ShenzhenrentspiderPipeline': 300,
+   'ShenZhenRentSpider.pipelines.SaveDataToMySQLPipeline':300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
