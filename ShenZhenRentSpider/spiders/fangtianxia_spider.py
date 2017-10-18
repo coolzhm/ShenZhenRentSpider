@@ -73,13 +73,23 @@ class FangTianXiaSpider(Spider):
             detail_url = "http://zu.sz.fang.com{0}".format(
                 response.xpath('//*[@class="houseList"]/dl[{0}]/dd/p[1]/a/@href'.format(i)).extract_first())
 
+            headers = {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'zh-CN,zh;q=0.8',
+                'Cache-Control': 'max-age=0',
+                'Connection': 'keep-alive',
+                'User-Agent': random.choice(self.USER_AGENTS)
+            }
+            print('子页面当前User-Agent为：')
+            print(headers['User-Agent'])
 
-            yield scrapy.Request(detail_url, callback=self.parse_rent_info, meta={'item': item})
+            yield scrapy.Request(detail_url, callback=self.parse_rent_info, meta={'item': item},headers=headers)
 
         # 遍历页码的标签，查看是否存在 下一页
         pagelist = response.xpath('//*[@id="rentid_D10_01"]/a')
-        if (self.page_count <= 2):
-
+        #此处自定义爬取页数
+        if (self.page_count <= 100):
             for j in range(1, len(pagelist) + 1):
                 value = response.xpath('//*[@id="rentid_D10_01"]/a[{0}]/text()'.format(j)).extract_first()
                 next_url = response.xpath('//*[@id="rentid_D10_01"]/a[%s]/@href' % j).extract_first()
@@ -93,7 +103,7 @@ class FangTianXiaSpider(Spider):
                         'Connection': 'keep-alive',
                         'User-Agent': random.choice(self.USER_AGENTS)
                     }
-                    print('当前User-Agent为')
+                    print('下一页面User-Agent为：')
                     print(headers['User-Agent'])
 
                     yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse, headers=headers)

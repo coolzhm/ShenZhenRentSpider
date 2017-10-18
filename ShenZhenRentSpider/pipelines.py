@@ -51,7 +51,6 @@ class SaveDataToMySQLPipeline(object):
                 connection.commit()
         finally:
             connection.close()
-        pass
 
     def spider_closed(self, spider):
         print(">>>>>>>>>>>>>>>> 写入MySQL数据库完成 <<<<<<<<<<<<<<<<<")
