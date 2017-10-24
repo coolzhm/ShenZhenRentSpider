@@ -4,6 +4,7 @@ import random
 from scrapy.spider import Spider
 import scrapy
 from ShenZhenRentSpider.items import HouseInfoItem
+import bs4
 
 
 class FangTianXiaSpider(Spider):
@@ -45,9 +46,10 @@ class FangTianXiaSpider(Spider):
         list = response.xpath('//*[@class="houseList"]/dl')
         print('------ 准备爬取第【{1}】网页 "{0}" 信息 ------'.format(response.url, self.page_count))
         print('========当前页面共有 {0} 个房源========='.format(len(list)))
+
         for i in range(1, len(list) + 1):
             self.data_count = self.data_count + 1
-            print("--------- 现在爬取第{0}个数据！！！---------------".format(i))
+            # print("--------- 现在爬取第{0}个数据！！！---------------".format(i))
             item = HouseInfoItem()
             item['title'] = response.xpath(
                 '//*[@class="houseList"]/dl[{0}]/dd/p[1]/a/@title'.format(i)).extract_first()
@@ -81,14 +83,14 @@ class FangTianXiaSpider(Spider):
                 'Connection': 'keep-alive',
                 'User-Agent': random.choice(self.USER_AGENTS)
             }
-            print('子页面当前User-Agent为：')
-            print(headers['User-Agent'])
+            # print('子页面当前User-Agent为：')
+            # print(headers['User-Agent'])
 
-            yield scrapy.Request(detail_url, callback=self.parse_rent_info, meta={'item': item},headers=headers)
+            yield scrapy.Request(detail_url, callback=self.parse_rent_info, meta={'item': item}, headers=headers)
 
         # 遍历页码的标签，查看是否存在 下一页
         pagelist = response.xpath('//*[@id="rentid_D10_01"]/a')
-        #此处自定义爬取页数
+        # 此处自定义爬取页数
         if (self.page_count <= 100):
             for j in range(1, len(pagelist) + 1):
                 value = response.xpath('//*[@id="rentid_D10_01"]/a[{0}]/text()'.format(j)).extract_first()
@@ -103,10 +105,11 @@ class FangTianXiaSpider(Spider):
                         'Connection': 'keep-alive',
                         'User-Agent': random.choice(self.USER_AGENTS)
                     }
-                    print('下一页面User-Agent为：')
-                    print(headers['User-Agent'])
+                    # print('下一页面User-Agent为：')
+                    # print(headers['User-Agent'])
 
-                    yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse, headers=headers)
+                    yield scrapy.Request("http://zu.sz.fang.com{0}".format(next_url), callback=self.parse,
+                                         headers=headers)
 
             print('----------------------- 爬取第【{0}】页面结束 --------------------------'.format(self.page_count))
             print('----------------------- 总计爬取【{0}】数据量 --------------------------'.format(self.data_count))
